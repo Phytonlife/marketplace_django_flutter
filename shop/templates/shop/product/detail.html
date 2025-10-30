@@ -1,0 +1,113 @@
+{% extends "shop/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ product.name }}{% endblock %}
+
+{% block content %}
+<div class="col-12">
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="{% if product.image %}{{ product.image.url }}{% else %}https://via.placeholder.com/500x500{% endif %}" class="img-fluid rounded" alt="{{ product.name }}">
+                </div>
+                <div class="col-md-7">
+                    <h2>{{ product.name }}</h2>
+                    <p class="text-muted">Brand: <a href="{{ product.brand.get_absolute_url }}">{{ product.brand.name }}</a></p>
+                    <p class="fs-4 fw-bold">${{ product.price }}</p>
+                    <p>{{ product.description|linebreaks }}</p>
+
+                    <div class="d-flex align-items-center my-3">
+                        <form action="{% url 'cart:cart_add' product.id %}" method="post" class="me-3">
+                            {% csrf_token %}
+                            <div class="input-group">
+                                <input type="number" name="quantity" value="1" min="1" class="form-control" style="width: 80px;">
+                                <button type="submit" class="btn btn-primary">Add to Cart</button>
+                            </div>
+                        </form>
+                        <a href="{% url 'shop:toggle_wishlist' product.id %}" class="btn btn-link text-warning p-0 fs-4">
+                            <i class="bi {% if in_wishlist %}bi-star-fill{% else %}bi-star{% endif %}"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reviews Section -->
+    <div class="card mt-4">
+        <div class="card-header">
+            <h4 class="mb-0">Отзывы</h4>
+        </div>
+        <div class="card-body">
+            {% for review in reviews %}
+                <div class="mb-3">
+                    <strong>{{ review.user.get_full_name|default:review.user.email }}</strong>
+                    <small class="text-muted">- {{ review.created|date:"d M Y" }}</small>
+                    <div class="text-warning">
+                        {% for i in "12345"|make_list %}
+                            <i class="bi bi-star{% if forloop.counter <= review.rating %}-fill{% endif %}"></i>
+                        {% endfor %}
+                    </div>
+                    <p>{{ review.comment }}</p>
+                    {% if review.advantages %}
+                        <p class="mb-1"><strong>Понравилось:</strong> {{ review.advantages }}</p>
+                    {% endif %}
+                    {% if review.disadvantages %}
+                        <p class="mb-1"><strong>Не понравилось:</strong> {{ review.disadvantages }}</p>
+                    {% endif %}
+                </div>
+                {% if not forloop.last %}<hr>{% endif %}
+            {% empty %}
+                <p>Отзывов на этот товар пока нет.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Add Review Form -->
+    <div class="card mt-4">
+        <div class="card-header">
+            <h4 class="mb-0">Оставить отзыв</h4>
+        </div>
+        <div class="card-body">
+            {% if user.is_authenticated %}
+                {% if user_has_reviewed %}
+                    <div class="alert alert-info">Вы уже оставили отзыв на этот товар.</div>
+                {% else %}
+                    <form action="{% url 'shop:add_review' product.id %}" method="post">
+                        {% csrf_token %}
+                        {{ review_form|crispy }}
+                        <button type="submit" class="btn btn-success mt-2">Отправить отзыв</button>
+                    </form>
+                {% endif %}
+            {% else %}
+                <div class="alert alert-warning">
+                    Вы должны <a href="{% url 'users:login' %}?next={{ request.path }}">войти</a>, чтобы оставить отзыв.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Similar Products -->
+    {% if similar_products %}
+        <div class="mt-4">
+            <h4 class="mb-3">Similar Products</h4>
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-4">
+                {% for p in similar_products %}
+                    <div class="col">
+                        <div class="card h-100 shadow-sm">
+                            <a href="{{ p.get_absolute_url }}">
+                                <img src="{% if p.image %}{{ p.image.url }}{% else %}https://via.placeholder.com/350x250{% endif %}" class="card-img-top" alt="{{ p.name }}">
+                            </a>
+                            <div class="card-body">
+                                <h5 class="card-title"><a href="{{ p.get_absolute_url }}" class="text-decoration-none text-dark">{{ p.name }}</a></h5>
+                                <p class="card-text fs-5 fw-bold">${{ p.price }}</p>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

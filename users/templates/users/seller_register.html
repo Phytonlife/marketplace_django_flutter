@@ -1,0 +1,25 @@
+{% extends 'shop/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Become a Seller{% endblock %}
+
+{% block content %}
+<div class="col-md-6 offset-md-3">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Register as a Seller</h3>
+        </div>
+        <div class="card-body">
+            <p>Create an account to start selling your products on our marketplace.</p>
+            <form method="post">
+                {% csrf_token %}
+                {{ form|crispy }}
+                <button type="submit" class="btn btn-primary w-100">Register and go to Dashboard</button>
+            </form>
+        </div>
+        <div class="card-footer text-center">
+            <small>Already have an account? <a href="{% url 'users:login' %}">Login here</a></small>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,9 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Seller Dashboard{% endblock %}
+
+{% block dashboard_content %}
+    <h2>Welcome to your Seller Dashboard</h2>
+    <p>Here you can manage your products.</p>
+    <p>You currently have {{ products.count }} product(s) listed.</p>
+{% endblock %}

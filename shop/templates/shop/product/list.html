@@ -1,0 +1,101 @@
+{% extends "shop/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+    {% if category %}{{ category.name }}{% elif brand %}{{ brand.name }}{% else %}Products{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="col-lg-3">
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Filters</h5>
+        </div>
+        <div class="card-body">
+            <form method="get">
+                {{ filter.form|crispy }}
+                <button type="submit" class="btn btn-primary w-100 mt-3">Apply Filters</button>
+            </form>
+        </div>
+    </div>
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5 class="mb-0">Categories</h5>
+        </div>
+        <div class="list-group list-group-flush">
+            <a href="{% url 'shop:product_list' %}" class="list-group-item list-group-item-action {% if not category %}active{% endif %}">All</a>
+            {% for c in categories %}
+                <a href="{{ c.get_absolute_url }}" class="list-group-item list-group-item-action {% if category.slug == c.slug %}active{% endif %}">{{ c.name }}</a>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<div class="col-lg-9">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">{% if category %}{{ category.name }}{% elif brand %}{{ brand.name }}{% else %}All Products{% endif %}</h4>
+        <form method="get" class="d-flex">
+            <select name="sort" class="form-select me-2" onchange="this.form.submit()">
+                <option value="name" {% if request.GET.sort == 'name' %}selected{% endif %}>Sort by name</option>
+                <option value="price_asc" {% if request.GET.sort == 'price_asc' %}selected{% endif %}>Price: low to high</option>
+                <option value="price_desc" {% if request.GET.sort == 'price_desc' %}selected{% endif %}>Price: high to low</option>
+            </select>
+        </form>
+    </div>
+
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
+        {% for product in page_obj %}
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+                    <img src="{% if product.image %}{{ product.image.url }}{% else %}https://via.placeholder.com/350x250{% endif %}" class="card-img-top" alt="{{ product.name }}">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <h5 class="card-title mb-0">
+                                <a href="{{ product.get_absolute_url }}" class="text-decoration-none text-dark stretched-link">{{ product.name }}</a>
+                            </h5>
+                            <a href="{% url 'shop:toggle_wishlist' product.id %}" class="btn btn-link text-warning p-0" style="position: relative; z-index: 1;">
+                                <i class="bi {% if product.id in wishlist_product_ids %}bi-star-fill{% else %}bi-star{% endif %}"></i>
+                            </a>
+                        </div>
+                        <p class="card-text text-muted">{{ product.brand.name }}</p>
+                        <p class="card-text fs-5 fw-bold">${{ product.price }}</p>
+                    </div>
+                    <div class="card-footer bg-transparent border-top-0">
+                         <form action="{% url 'cart:cart_add' product.id %}" method="post" class="d-grid" style="position: relative; z-index: 1;">
+                            {% csrf_token %}
+                            <input type="hidden" name="quantity" value="1">
+                            <button type="submit" class="btn btn-primary">Add to Cart</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <div class="alert alert-warning" role="alert">
+                    No products found.
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    {% if page_obj.has_other_pages %}
+        <nav aria-label="Page navigation" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?page=1">&laquo; First</a></li>
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+                {% endif %}
+
+                <li class="page-item active" aria-current="page">
+                    <span class="page-link">{{ page_obj.number }}</span>
+                </li>
+
+                {% if page_obj.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+</div>
+{% endblock %}

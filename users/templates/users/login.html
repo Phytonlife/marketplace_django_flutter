@@ -1,0 +1,38 @@
+{% extends 'shop/base.html' %}
+{% load crispy_forms_tags %}
+{% load socialaccount %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div class="col-md-6 offset-md-3">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Login</h3>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                {{ form|crispy }}
+                <button type="submit" class="btn btn-primary w-100">Login</button>
+            </form>
+            {% get_providers as socialaccount_providers %}
+            {% if socialaccount_providers %}
+            <div class="text-center my-3">
+                <p>OR</p>
+                {% for provider in socialaccount_providers %}
+                    {% if provider.id == 'google' %}
+                        <a href="{% provider_login_url 'google' %}" class="btn btn-danger w-100">
+                            <i class="bi bi-google"></i> Login with Google
+                        </a>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        <div class="card-footer text-center">
+            <small>Don't have an account? <a href="{% url 'users:register' %}">Register here</a></small>
+        </div>
+    </div>
+</div>
+{% endblock %}
