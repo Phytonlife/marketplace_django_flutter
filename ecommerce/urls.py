@@ -2,10 +2,16 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from rest_framework_simplejwt.views import ( # Added for JWT authentication
+    TokenObtainPairView,
+    TokenRefreshView,
+)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('ecommerce.api_urls')),
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'), # JWT token obtain
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'), # JWT token refresh
     path('', include('shop.urls', namespace='shop')),
     path('cart/', include('cart.urls', namespace='cart')),
     path('orders/', include('orders.urls', namespace='orders')),
