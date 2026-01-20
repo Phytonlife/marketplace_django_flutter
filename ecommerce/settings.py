@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-svis9myk_hv779^84lb1!u!d0_wcch_5ri-df#xh7=kanmx_z6
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['10.0.2.2', '127.0.0.1', 'localhost', 'backend']
 
 
 # Application definition
@@ -58,11 +58,13 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -180,6 +182,9 @@ SOCIALACCOUNT_PROVIDERS = {
 
 
 CART_SESSION_ID = 'cart'
+
+CORS_ORIGIN_ALLOW_ALL = True
+
 
 from datetime import timedelta # Added for SIMPLE_JWT settings
 

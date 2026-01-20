@@ -1,17 +1,22 @@
 from rest_framework import generics, permissions, status, viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import action
+from rest_framework_simplejwt.views import TokenObtainPairView
 from users.models import User, Address
 from shop.models import Product, Category, Brand, Review, Wishlist
 from orders.models import Order, OrderItem # Added for Order
 from .models import Cart, CartItem
 from .serializers import (
+    MyTokenObtainPairSerializer,
     UserSerializer, UserRegistrationSerializer, AddressSerializer,
     CategorySerializer, BrandSerializer, ProductSerializer,
     ReviewSerializer, WishlistSerializer,
     CartSerializer, CartItemSerializer,
     OrderSerializer, OrderItemSerializer # Added for Order
 )
+
+class MyTokenObtainPairView(TokenObtainPairView):
+    serializer_class = MyTokenObtainPairSerializer
 
 # Custom Permissions
 class IsSellerOrReadOnly(permissions.BasePermission):
@@ -81,7 +86,7 @@ class BrandViewSet(viewsets.ReadOnlyModelViewSet):
     lookup_field = 'slug'
 
 class ProductViewSet(viewsets.ModelViewSet):
-    queryset = Product.objects.filter(available=True)
+    queryset = Product.objects.all()
     serializer_class = ProductSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsSellerOrReadOnly]
 

@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: wb_backend
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - .:/app
+      - ./db.sqlite3:/app/db.sqlite3
+    ports:
+      - "8000:8000"
+    environment:
+      - DJANGO_SETTINGS_MODULE=ecommerce.settings
+    networks:
+      - wb_network
+
+  frontend:
+    build:
+      context: ./ecommerce_app
+      dockerfile: Dockerfile
+    container_name: wb_frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    networks:
+      - wb_network
+
+networks:
+  wb_network:
+    driver: bridge

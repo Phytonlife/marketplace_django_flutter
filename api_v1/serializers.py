@@ -1,8 +1,45 @@
 from rest_framework import serializers
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from users.models import User, Address
 from shop.models import Product, Category, Brand, Review, Wishlist
 from .models import Cart, CartItem
-from orders.models import Order, OrderItem # Added imports for Order
+from orders.models import Order, OrderItem
+
+class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+        # Add custom claims
+        token['username'] = user.username
+        token['email'] = user.email
+        return token
+
+    def validate(self, attrs):
+        email = attrs.get('email')
+        password = attrs.get('password')
+
+        if not email or not password:
+            raise serializers.ValidationError('Must include "email" and "password".')
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            raise serializers.ValidationError('No user with this email address was found.')
+
+        if not user.check_password(password):
+            raise serializers.ValidationError('Incorrect password.')
+
+        if not user.is_active:
+            raise serializers.ValidationError('User account is disabled.')
+
+        self.user = user
+        refresh = self.get_token(self.user)
+
+        data = {}
+        data['refresh'] = str(refresh)
+        data['access'] = str(refresh.access_token)
+
+        return data
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:

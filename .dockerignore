@@ -1,0 +1,29 @@
+# Git
+.git
+.gitignore
+
+# IDE
+.idea
+.vscode
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+.venv/
+
+# Django
+db.sqlite3
+media/
+static/
+
+# Flutter
+ecommerce_app/build/
+ecommerce_app/.dart_tool/
+ecommerce_app/.flutter-plugins
+ecommerce_app/.flutter-plugins-dependencies
+
+# Docker
+docker-compose.override.yml
